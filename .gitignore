@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+data/uploads/*
+!data/uploads/.gitkeep
+models/murmur_cnn_v[2-9]*.keras
+models/retrain_status.json
+models/retrain.lock
+results/*.csv
+results/*.json

@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+demo_bundle
+assets
+notebook
+results
+tests
+data/uploads/*
+models/murmur_cnn_v[2-9]*.keras
+models/retrain_status.json
+models/retrain.lock

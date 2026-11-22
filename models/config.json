@@ -1,0 +1,13 @@
+{
+  "threshold": 0.7,
+  "sr": 4000,
+  "win_sec": 5.0,
+  "n_mels": 64,
+  "input_shape": [
+    64,
+    157,
+    1
+  ],
+  "architecture": "C_deep",
+  "label_rule_restrict_to_murmur_locations": true
+}

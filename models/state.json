@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "model_file": "murmur_cnn_v1.keras",
+  "threshold": 0.7,
+  "history": [],
+  "used_batches": []
+}

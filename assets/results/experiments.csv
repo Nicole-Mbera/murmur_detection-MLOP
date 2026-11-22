@@ -1,0 +1,4 @@
+name,params,epochs_run,best_epoch,train_pr_auc,val_window_pr_auc,val_rec_roc_auc,val_rec_pr_auc,minutes
+A_base,23697,32,26,0.804,0.612,0.829,0.703,1.5
+B_wide,93473,32,26,0.843,0.643,0.843,0.717,2.6
+C_deep,98001,15,9,0.893,0.68,0.894,0.762,0.9
