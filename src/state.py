@@ -3,10 +3,9 @@ import json, os, time, tempfile
 
 DEFAULT_STATE = {
     "version": 1,
-    "model_file": "murmur_cnn_v1.keras",
+    "model_file": "murmur_cnn_v1.h5",
     "threshold": 0.73,
     "history": [],        # one entry per retraining attempt
-    "used_batches": [],   # upload batches already included in a retraining run
 }
 
 

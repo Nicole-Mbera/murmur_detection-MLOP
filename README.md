@@ -1,29 +1,116 @@
 # Heart murmur detection from heart sound recordings (CirCor DigiScope)
 
-Binary classification of phonocardiogram audio (murmur present / absent), with an end-to-end pipeline:
-data processing, model training and evaluation, a prediction API, retraining on uploaded data, a web UI, Docker deployment
-and load testing.
+An end-to-end machine learning pipeline for **non-tabular data (audio)**. A convolutional neural network classifies a
+heart sound recording as murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
+training and evaluation, a prediction API, a database for uploaded data, retraining, a web interface, Docker packaging,
+cloud deployment and load testing.
 
-> TODO before submission: add the video demo link, the deployed URL, and the load test results (see sections below).
+The model is a screening aid, not a diagnostic tool. It extends my previous assignment (ECG arrhythmia classification) in
+the same cardiac screening theme, for settings where specialist cardiologists are scarce.
+
+- **Video demo:** TODO add the YouTube link
+- **Deployed application:** TODO add the URL, for example `http://<public-ip>:8501` (UI) and `http://<public-ip>/docs` (API docs)
+- **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
+
+## What the system does
+
+| Requirement | Where |
+|---|---|
+| Data acquisition, preprocessing, model creation, testing | `notebook/heart_murmur.ipynb`, `src/preprocessing.py`, `src/model.py` |
+| Prediction for one recording (.wav) | UI page **Predict**, API `POST /predict`, `src/prediction.py` |
+| Visualizations with interpretations | UI page **Data visualizations**, notebook Sections 4 and 6 |
+| Upload bulk data, saved to a database | UI page **Upload and retrain**, API `POST /upload`, SQLite database (`src/data_store.py`) |
+| Preprocessing of the uploaded data | Done at upload time with the same `preprocessing.py`; a preview is shown in the UI |
+| Retraining (button and automatic trigger) | API `POST /retrain`, automatic once enough new recordings are saved, `src/retrain.py` |
+| Model up-time | UI page **Overview**, API `GET /status` |
+| Load test with different numbers of containers | `locust/`, `scripts/run_load_tests.sh`, results below |
 
 ## Project structure
 ```
-notebook/heart_murmur_pipeline.ipynb   preprocessing, EDA, experiments, evaluation
-src/        preprocessing.py, model.py, prediction.py, retrain.py, data_store.py, state.py
-api/        FastAPI service (predict, upload, retrain, status)
-ui/         Streamlit interface
-data/       train/ and test/ small samples used for retraining; uploads/ holds user-uploaded data
-models/     model file (.keras) and state.json (version, threshold)
-assets/     figures, result tables and recordings.csv used by the UI
-demo_bundle/ 60 example recordings (present/ and absent/) from held-out test patients
-locust/     load test script and summarizer
-nginx/      load balancer configuration
-scripts/    scale.sh, run_load_tests.sh, reset_demo.sh
+README.md
+DEPLOY.md                         AWS deployment and load test instructions
+WALKTHROUGH.md                    plain-language explanation of the project and the demo plan
+notebook/heart_murmur.ipynb       EDA, preprocessing, three experiments, evaluation, saving, demos
+src/
+  preprocessing.py                audio -> log-mel spectrogram windows (shared by notebook, API, retraining)
+  model.py                        CNN definition, training helpers, evaluation metrics
+  prediction.py                   loads the model and predicts one recording
+  retrain.py                      fine-tuning with a promotion check
+  data_store.py                   SQLite database of uploaded recordings
+  state.py                        model version and retraining state shared by containers
+data/
+  train/                          train_sample.npz and val_sample.npz (small samples for retraining)
+  test/present, test/absent       60 example recordings from held-out test patients
+  uploads/                        uploads.db (created at run time)
+models/
+  murmur_cnn_v1.h5                trained model
+  config.json, state.json         threshold and preprocessing settings; current model version
+api/main.py                       FastAPI service
+ui/                               Streamlit web interface (ui/assets holds figures and result tables)
+nginx/nginx.conf                  load balancer
+locust/                           load test script and summary script
+scripts/                          scale.sh, run_load_tests.sh, reset_demo.sh, score_demo.py
+docker-compose.yml, Dockerfile.*  containers: api, gateway (nginx), ui, locust
+results/                          load test results
+tests/test_api.py                 end-to-end test of the API
 ```
 
 ## Run it
-See [DEPLOY.md](DEPLOY.md) for AWS EC2. On any machine with Docker: `docker compose up -d --build`, then open
-`http://localhost:8501` (UI) and `http://localhost/docs` (API).
+
+### With Docker (recommended)
+```bash
+docker compose up -d --build
+```
+Open `http://localhost:8501` for the web interface and `http://localhost/docs` for the API documentation.
+To run several API containers behind the load balancer: `scripts/scale.sh 3`.
+To stop: `docker compose down`. For AWS, see [DEPLOY.md](DEPLOY.md).
+
+### Without Docker
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r ui/requirements.txt
+PYTHONPATH=. uvicorn api.main:app --port 8000            # terminal 1
+API_URL=http://localhost:8000 streamlit run ui/app.py    # terminal 2
+```
+
+### Reproduce the model
+Open `notebook/heart_murmur.ipynb` in Kaggle with the CirCor DigiScope dataset attached
+(`bjoernjostein/the-circor-digiscope-phonocardiogram-dataset-v2`) and run all cells. The last cells create `export.zip` with the
+model, samples, demo recordings and figures in the layout of this repository.
+
+## API
+| Endpoint | Purpose |
+|---|---|
+| `POST /predict` | one .wav file; returns label, murmur probability, per-window probabilities, model version, latency |
+| `POST /upload` | several .wav files with `label=present|absent`, or one .zip with `present/` and `absent/` folders |
+| `POST /retrain` | start retraining in the background (`epochs` optional) |
+| `GET /status` | up-time, model version, request counts, retraining progress, uploads waiting, history |
+| `GET /uploads` | latest rows of the uploads database |
+| `GET /data/summary`, `GET /health` | data counts and health check |
+
+## How it works
+1. **Preprocessing.** Each recording is resampled to 4 kHz, band-pass filtered (25 to 500 Hz), cut into 5 s windows and converted to a
+   64 x 157 log-mel spectrogram, standardised per window.
+2. **Model.** A small CNN (batch normalisation, dropout, global average pooling) outputs a murmur probability per window. The
+   probabilities of all windows of a recording are averaged and compared with a threshold chosen on validation data.
+3. **Splits.** Patients are split 70/15/15 into train, validation and test. No patient appears in two splits.
+4. **Retraining.** Uploaded recordings are preprocessed and stored in a SQLite database. Retraining fine-tunes the current model on the base
+   sample plus all uploads, compares old and new model on a fixed validation sample, and promotes the new model only if it is not
+   clearly worse. All containers see the new model after promotion.
 
 ## Results
-TODO: model results from the notebook, and the Locust table from `results/summary.md`.
+
+### Model (held-out test patients)
+TODO copy the table from the notebook (Section 8.5) or `ui/assets/results/test_metrics.csv`, with the experiment comparison from
+`ui/assets/results/experiments.csv`.
+
+### Load test (Locust)
+TODO paste `results/summary.md` and add `results/load_test_summary.png` after running `scripts/run_load_tests.sh`
+(conditions: instance type, number of users, duration).
+
+## Limitations
+- The label rule keeps a recording from a murmur patient only where a murmur was annotated at that site, so performance is measured on those
+  recordings and not on every recording from a murmur patient.
+- Results come from one data split and one training run per experiment.
+- The demo recordings come from test patients, so after the retraining demo the test set is no longer untouched for the retrained model.
+- The API has no authentication, and the model has been validated on one pediatric dataset only.

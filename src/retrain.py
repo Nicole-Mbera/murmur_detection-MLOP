@@ -6,7 +6,7 @@ from sklearn.utils.class_weight import compute_class_weight
 
 from src.model import compile_model, make_ds, evaluate_windows
 from src.state import load_state, save_state, write_retrain_status
-from src.data_store import load_uploads, list_batches
+from src.data_store import load_uploads, mark_used
 
 LOCK_MAX_AGE = 3600  # seconds before a lock file is treated as stale
 
@@ -40,8 +40,8 @@ def retrain(models_dir="models", data_dir="data", epochs=5, lr=1e-4, tolerance=0
                              started_at=started, trigger=trigger)
         state = load_state(models_dir)
         base = np.load(os.path.join(data_dir, "train", "train_sample.npz"))
-        val = np.load(os.path.join(data_dir, "test", "val_sample.npz"))
-        Xu, yu = load_uploads(data_dir)
+        val = np.load(os.path.join(data_dir, "train", "val_sample.npz"))
+        Xu, yu, upload_ids = load_uploads(data_dir)
         X, y = base["X"], base["y"].astype("float32")
         n_up = 0 if Xu is None else len(Xu)
         if Xu is not None:
@@ -72,11 +72,11 @@ def retrain(models_dir="models", data_dir="data", epochs=5, lr=1e-4, tolerance=0
                  "tolerance": tolerance}
         if promoted:
             version = state["version"] + 1
-            fname = f"murmur_cnn_v{version}.keras"
+            fname = f"murmur_cnn_v{version}.h5"
             model.save(os.path.join(models_dir, fname))
             state.update(version=version, model_file=fname)
             entry["new_version"] = version
-        state["used_batches"] = [b["batch_id"] for b in list_batches(data_dir)]
+        mark_used(data_dir, upload_ids, started)
         state["history"] = (state["history"] + [entry])[-20:]
         save_state(models_dir, state)
         write_retrain_status(models_dir, status="done", finished_at=time.time(), started_at=started,

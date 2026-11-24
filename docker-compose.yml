@@ -46,11 +46,10 @@ services:
       API_URL: http://gateway
       DATA_DIR: /app/data
       ASSETS_DIR: /app/assets
-      DEMO_DIR: /app/demo_bundle
+      DEMO_DIR: /app/data/test
     volumes:
       - ./data:/app/data:ro
-      - ./assets:/app/assets:ro
-      - ./demo_bundle:/app/demo_bundle:ro
+      - ./ui/assets:/app/assets:ro
     ports:
       - "8501:8501"
     depends_on:
@@ -66,7 +65,7 @@ services:
       DEMO_DIR: /demo
     volumes:
       - ./locust:/locust:ro
-      - ./demo_bundle:/demo:ro
+      - ./data/test:/demo:ro
       - ./results:/results
     depends_on:
       - gateway

@@ -1,7 +1,6 @@
 {
   "version": 1,
-  "model_file": "murmur_cnn_v1.keras",
+  "model_file": "murmur_cnn_v1.h5",
   "threshold": 0.7,
-  "history": [],
-  "used_batches": []
+  "history": []
 }

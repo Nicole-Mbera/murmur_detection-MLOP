@@ -11,9 +11,9 @@ import requests
 import streamlit as st
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000").rstrip("/")
-ASSETS = os.environ.get("ASSETS_DIR", "assets")
+ASSETS = os.environ.get("ASSETS_DIR", "ui/assets")
 DATA = os.environ.get("DATA_DIR", "data")
-DEMO_DIR = os.environ.get("DEMO_DIR", "demo_bundle")
+DEMO_DIR = os.environ.get("DEMO_DIR", "data/test")
 
 st.set_page_config(page_title="Heart murmur screening", layout="wide")
 
@@ -95,8 +95,9 @@ def page_overview():
     st.write(f"State: **{ret.get('status', 'idle')}**"
              + (" (running now)" if ret.get("running") else ""))
     pend = status["pending_uploads"]
-    st.write(f"New uploaded recordings waiting to be used: **{pend['recordings']}** "
-             f"(automatic retraining starts at {status['auto_retrain_at_recordings']}).")
+    db = status["database"]
+    st.write(f"Uploads database: **{db['recordings']}** recordings saved so far; **{pend['recordings']}** are waiting "
+             f"to be used (automatic retraining starts at {status['auto_retrain_at_recordings']}).")
 
     hist = status["retrain_history"]
     if hist:
@@ -295,11 +296,30 @@ def page_upload_retrain():
             st.session_state["last_upload"] = res
     res = st.session_state.get("last_upload")
     if res:
-        st.success(f"Accepted {res['accepted_recordings']} recordings ({res['accepted_windows']} windows). "
-                   f"Pending: {res['pending_recordings']}." + (" Automatic retraining started." if res["auto_retrain_started"] else ""))
+        st.success(f"Saved {res['accepted_recordings']} recordings to the database ({res['accepted_windows']} spectrogram windows). "
+                   f"Waiting for retraining: {res['pending_recordings']}."
+                   + (" Automatic retraining started." if res["auto_retrain_started"] else ""))
+        st.write("**Preprocessing applied to every uploaded recording:** " + " > ".join(res["preprocessing"]))
+        prev = res.get("preview")
+        if prev:
+            fig, ax = plt.subplots(figsize=(6, 2.8))
+            im = ax.imshow(np.array(prev["spectrogram"]), origin="lower", aspect="auto", extent=[0, 5, 25, 500], cmap="viridis")
+            ax.set_xlabel("Time in window (s)"); ax.set_ylabel("Frequency (Hz)")
+            ax.set_title(f"First window of {prev['filename']} after preprocessing")
+            plt.colorbar(im, ax=ax)
+            st.pyplot(fig); plt.close(fig)
+        st.dataframe(pd.DataFrame(res["files"]), hide_index=True, width="stretch")
         if res["rejected"]:
             st.warning(f"{len(res['rejected'])} file(s) rejected")
             st.dataframe(pd.DataFrame(res["rejected"]), hide_index=True)
+
+    up_db, _ = api_get("/uploads?limit=10")
+    if up_db and up_db["recent"]:
+        st.write(f"**Uploads database** ({up_db['database']['recordings']} recordings). Most recent rows:")
+        rows = [{"id": r["id"], "file": r["filename"], "label": r["label"], "windows": r["windows"],
+                 "uploaded": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(r["uploaded_at"])),
+                 "used in retraining": r["used_in_retraining"]} for r in up_db["recent"]]
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
     st.subheader("2. Retrain")
     epochs = st.slider("Fine-tuning epochs", 1, 15, 5)

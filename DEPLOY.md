@@ -6,7 +6,10 @@ the Streamlit UI (`ui`) on port 8501, and an optional Locust container (`locust`
 ## 1. Launch the machine (EC2 console)
 1. EC2 > Launch instance. Name: `heart-murmur`.
 2. Image: Ubuntu Server 24.04 LTS.
-3. Instance type: `m7i-flex.large` (the console marks it "Free tier eligible"; it has 8 GiB of RAM).
+3. Instance type: **`m7i-flex.large`** (the console marks it "Free tier eligible"; it has 8 GiB of RAM).
+   Do not use `t3.micro`: it has 1 GiB of RAM, and one API container alone needs about 750 MB, so the machine runs out of memory,
+   becomes unresponsive and SSH times out. To change the type of an existing instance: stop it, then Actions > Instance settings >
+   Change instance type, then start it again.
 4. Key pair: create a new one, download the `.pem` file, keep it safe.
 5. Network settings > create a security group with:
    - SSH (22): source **My IP**
@@ -58,7 +61,16 @@ Notes for interpreting the results:
 - Do not retrain during a load test. Retraining uses the same CPUs.
 - Run `scripts/reset_demo.sh` and `docker compose restart api` before a test if you retrained earlier, so the model is v1.
 
-## 6. Useful commands
+## 6. After changing the code or the model
+```bash
+git pull
+docker compose up -d --build
+scripts/reset_demo.sh               # model v1, empty uploads database
+docker compose restart api
+```
+Containers do not update by themselves: the running containers keep the old code until you rebuild.
+
+## 7. Useful commands
 ```bash
 docker compose logs -f api          # API logs
 docker stats                        # memory and CPU per container
@@ -66,8 +78,10 @@ docker compose down                 # stop everything
 scripts/reset_demo.sh               # back to model v1, no uploaded data
 ```
 
-## 7. Cost and security
-- Stop the instance (EC2 > Instance state > Stop) when you are not using it. The public IP changes after a stop and start.
+## 8. Cost and security
+- First run `docker compose down`, then stop the instance (EC2 > Instance state > Stop) when you are not using it. Stopping pauses
+  compute charges; the disk is still billed. The public IP changes after a stop and start, so update the URL in the README.
+- Check the Billing dashboard every day or two.
 - The API has no login. Anyone who knows the address can upload data and trigger retraining. Keep the security group tight
   (or stop the instance) outside your demo and the grading period.
 - If memory runs out (`docker stats`, `docker compose logs api`), use 2 API containers.

@@ -1,0 +1,5 @@
+metric,value,ci95_low,ci95_high
+ROC-AUC,0.969,0.934,0.995
+PR-AUC,0.934,0.858,0.983
+Recall (Present),0.825,0.704,0.932
+Precision (Present),0.957,0.889,1.0

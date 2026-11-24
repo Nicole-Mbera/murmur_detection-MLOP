@@ -13,7 +13,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from src.data_store import ingest, list_batches, pending_summary
+from src.data_store import db_summary, ingest, list_recent, pending_summary
 from src.prediction import Predictor
 from src.retrain import is_retraining, retrain
 from src.state import load_state, read_retrain_status
@@ -77,7 +77,8 @@ def status():
         "prediction_errors": errs,
         "avg_latency_ms": round(lat / n, 1) if n else None,
         "retraining": {**read_retrain_status(MODELS_DIR), "running": is_retraining(MODELS_DIR)},
-        "pending_uploads": pending_summary(DATA_DIR, state["used_batches"]),
+        "pending_uploads": pending_summary(DATA_DIR),
+        "database": db_summary(DATA_DIR),
         "auto_retrain_at_recordings": AUTO_RETRAIN_AT,
         "retrain_history": state["history"][-5:],
     }
@@ -157,12 +158,15 @@ def upload(files: list[UploadFile] = File(...), label: str = Form("")):
     if meta is None:
         raise HTTPException(400, {"message": "No usable recordings", "rejected": rejected})
     state = load_state(MODELS_DIR)
-    pending = pending_summary(DATA_DIR, state["used_batches"])
+    pending = pending_summary(DATA_DIR)
     auto = False
     if pending["recordings"] >= AUTO_RETRAIN_AT and not is_retraining(MODELS_DIR):
         _start_retrain("auto")
         auto = True
     return {"batch_id": meta["batch_id"], "accepted_recordings": meta["n_recordings"], "accepted_windows": meta["n_windows"],
+            "saved_to_database": True, "files": meta["files"], "preview": meta["preview"],
+            "preprocessing": ["resample to 4 kHz", "band-pass 25-500 Hz", "cut into 5 s windows (max 8)",
+                              "log-mel spectrogram 64 x 157", "standardise each window"],
             "rejected": rejected, "pending_recordings": pending["recordings"],
             "auto_retrain_started": auto, "auto_retrain_at_recordings": AUTO_RETRAIN_AT}
 
@@ -172,7 +176,7 @@ def trigger_retrain(epochs: int = 5, force: bool = False):
     if is_retraining(MODELS_DIR):
         raise HTTPException(409, "A retraining run is already in progress")
     state = load_state(MODELS_DIR)
-    pending = pending_summary(DATA_DIR, state["used_batches"])
+    pending = pending_summary(DATA_DIR)
     if pending["recordings"] == 0 and not force:
         raise HTTPException(400, "No new uploaded data since the last retraining. Upload data first or pass force=true.")
     if not 1 <= epochs <= 30:
@@ -185,11 +189,14 @@ def trigger_retrain(epochs: int = 5, force: bool = False):
 def data_summary():
     import numpy as np
     out = {}
-    for name, path in [("train_sample", "train/train_sample.npz"), ("validation_sample", "test/val_sample.npz")]:
+    for name, path in [("train_sample", "train/train_sample.npz"), ("validation_sample", "train/val_sample.npz")]:
         y = np.load(os.path.join(DATA_DIR, path))["y"]
         out[name] = {"windows": int(len(y)), "murmur_windows": int(y.sum())}
-    batches = list_batches(DATA_DIR)
-    out["uploads"] = {"batches": len(batches), "recordings": sum(b["n_recordings"] for b in batches),
-                      "windows": sum(b["n_windows"] for b in batches),
-                      "murmur_windows": sum(b["n_present_windows"] for b in batches)}
+    out["uploads_database"] = db_summary(DATA_DIR)
     return out
+
+
+@app.get("/uploads")
+def recent_uploads(limit: int = 20):
+    """Most recent recordings saved in the uploads database."""
+    return {"database": db_summary(DATA_DIR), "recent": list_recent(DATA_DIR, min(max(limit, 1), 200))}

@@ -19,7 +19,7 @@ r = c.post("/predict", files={"file": ("a.txt", b"hello world" * 20, "text/plain
 
 # upload: 6 files with a label
 files = [("files", (f"p{i}.wav", wav_bytes(f=90), "audio/wav")) for i in range(6)]
-r = c.post("/upload", files=files, data={"label": "present"}); print("upload labelled", r.status_code, r.json())
+r = c.post("/upload", files=files, data={"label": "present"}); j = r.json(); print("upload labelled", r.status_code, {k: v for k, v in j.items() if k not in ("preview", "files")}, "| preview:", bool(j.get("preview")), "| saved_to_database:", j.get("saved_to_database"))
 # upload: zip with folders, 8 recordings -> crosses the auto threshold (12)
 zb = io.BytesIO()
 with zipfile.ZipFile(zb, "w") as z:
@@ -41,3 +41,4 @@ print("version", s["model_version"], "pending", s["pending_uploads"]["recordings
 r = c.post("/retrain"); print("retrain with nothing pending", r.status_code, r.json())
 r = c.post("/predict", files={"file": ("a.wav", wav_bytes(), "audio/wav")}); print("predict after", r.status_code, r.json()["model_version"])
 print(c.get("/data/summary").json())
+u = c.get("/uploads?limit=3").json(); print("db rows:", u["database"], [r["filename"] for r in u["recent"]])
