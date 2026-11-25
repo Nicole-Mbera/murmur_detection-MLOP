@@ -132,6 +132,13 @@ Full tables, figures and interpretations are in the notebook (Sections 7 and 8).
 <img width="1487" height="566" alt="image" src="https://github.com/user-attachments/assets/5c3c6b51-2db8-4187-be0b-1ccc42aeafd9" />
 
 
+| API containers | Requests | Failures | Median (ms) | Mean (ms) | p95 (ms) | p99 (ms) | Requests/s | Containers that answered |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 3525 | 0 | 2700 | 2635 | 3100 | 3300 | 29.4 | 1 |
+| 2 | 4822 | 1 | 1600 | 1769 | 3800 | 4500 | 40.2 | 2 |
+| 3 | 4734 | 3 | 1100 | 1810 | 5100 | 6100 | 39.5 | 3 |
+
+
 ## Limitations
 - The label rule keeps a recording from a murmur patient only where a murmur was annotated at that site, so performance is measured on those
   recordings and not on every recording from a murmur patient.
