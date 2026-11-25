@@ -182,9 +182,9 @@ def page_visualizations():
     a, b = st.columns([1, 1])
     a.pyplot(fig)
     b.markdown(
-        "**What it shows.** About 17% of recordings have a murmur in every split (17.3% train, 16.9% validation, 17.4% test), "
+        " About 17% of recordings have a murmur in every split (17.3% train, 16.9% validation, 17.4% test), "
         "so the splits are comparable.\n\n"
-        "**Why it matters.** A model that always answered Absent would be about 83% accurate and find no murmurs. "
+        " A model that always answered Absent would be about 83% accurate and find no murmurs. "
         "Accuracy is therefore not a useful score here, which is why the evaluation uses PR-AUC, recall and precision.")
     plt.close(fig)
 
@@ -200,9 +200,9 @@ def page_visualizations():
     a, b = st.columns([1, 1])
     a.pyplot(fig)
     b.markdown(
-        "**What it shows.** Murmur rates sit in a narrow band across the four main valve sites (15.3% aortic, 17.2% pulmonary, "
+        "Murmur rates sit in a narrow band across the four main valve sites (15.3% aortic, 17.2% pulmonary, "
         "18.0% mitral, 18.3% tricuspid), each with 689 to 777 recordings.\n\n"
-        "**Why it matters.** The recording site does not separate murmur from no murmur, so the model has to find the murmur in the sound itself. "
+        " The recording site does not separate murmur from no murmur, so the model has to find the murmur in the sound itself. "
         "A site with only 4 recordings was left out. Rates reflect the labelling rule: a recording from a murmur patient counts as Present only "
         "if its site is listed as a murmur location.")
     plt.close(fig)
@@ -216,9 +216,9 @@ def page_visualizations():
     a, b = st.columns([1, 1])
     a.pyplot(fig)
     b.markdown(
-        f"**What it shows.** {rec['patient_id'].nunique()} patients contribute {len(rec):,} recordings, "
+        f"{rec['patient_id'].nunique()} patients contribute {len(rec):,} recordings, "
         f"{len(rec) / rec['patient_id'].nunique():.1f} per patient on average (most have 3 or 4).\n\n"
-        "**Why it matters.** Recordings from one child are alike. If they were split at random, the same child would appear in training and test "
+        "Recordings from one child are alike. If they were split at random, the same child would appear in training and test "
         "and the score would be inflated. All splits here are by patient, the same lesson as the inter-patient ECG result.")
     plt.close(fig)
 
@@ -238,11 +238,11 @@ def page_visualizations():
     a, b = st.columns([1, 1])
     a.pyplot(fig)
     b.markdown(
-        f"**What it shows.** Averaged over {n0} Absent and {n1} Present training windows (a balanced sample), murmur windows carry relatively less energy "
+        f"Averaged over {n0} Absent and {n1} Present training windows (a balanced sample), murmur windows carry relatively less energy "
         "below about 80 Hz and slightly more between roughly 90 and 400 Hz, with the largest gap near 150 Hz. Each window is standardised, so this is a "
         "difference in spectral shape, not loudness. The difference is small (at most 0.1 on a scale that spans about 2), and faint vertical "
         "banding appears roughly once per second.\n\n"
-        "**Why it matters.** The signal is subtle on average, which fits a model that finds the murmur with moderate recall, not perfectly. "
+        " The signal is subtle on average, which fits a model that finds the murmur with moderate recall, not perfectly. "
         "The averages cannot show how individual murmurs vary.")
     plt.close(fig)
 
