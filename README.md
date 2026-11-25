@@ -129,8 +129,8 @@ Experiments (validation set, recording level):
 Full tables, figures and interpretations are in the notebook (Sections 7 and 8).
 
 ### Load test (Locust)
-TODO paste `results/summary.md` and add `results/load_test_summary.png` after running `scripts/run_load_tests.sh`
-(conditions: instance type, number of users, duration).
+<img width="1487" height="566" alt="image" src="https://github.com/user-attachments/assets/5c3c6b51-2db8-4187-be0b-1ccc42aeafd9" />
+
 
 ## Limitations
 - The label rule keeps a recording from a murmur patient only where a murmur was annotated at that site, so performance is measured on those
