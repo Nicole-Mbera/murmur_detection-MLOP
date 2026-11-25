@@ -1,6 +1,6 @@
 # Heart murmur detection from heart sound recordings (CirCor DigiScope)
 
-An end-to-end machine learning pipeline for audio processing and traing a convolutional neural network classifier to detect whether a
+An end-to-end machine learning pipeline for audio processing and training a convolutional neural network classifier to detect whether a
 heart sound recording has features of murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
 training and evaluation, a prediction API, a database for uploaded data, retraining, a web interface, Docker packaging,
 cloud deployment and load testing.
