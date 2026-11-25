@@ -1,15 +1,15 @@
 # Heart murmur detection from heart sound recordings (CirCor DigiScope)
 
-An end-to-end machine learning pipeline for **non-tabular data (audio)**. A convolutional neural network classifies a
-heart sound recording as murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
+An end-to-end machine learning pipeline for audio processing and traing a convolutional neural network classifier to detect whether a
+heart sound recording has features of murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
 training and evaluation, a prediction API, a database for uploaded data, retraining, a web interface, Docker packaging,
 cloud deployment and load testing.
 
-The model is a screening aid, not a diagnostic tool. It extends my previous assignment (ECG arrhythmia classification) in
-the same cardiac screening theme, for settings where specialist cardiologists are scarce.
+The model is a screening tool. It extends my previous assignment (ECG arrhythmia classification) in
+the same cardiac screening theme, for resource limited settings where specialist cardiologists are scarce.
 
 - **Video demo:** https://youtu.be/3HfbucBVWFQ
-- **Deployed application:** TODO add the URL, for example `http://<public-ip>:8501` (UI) and `http://<public-ip>/docs` (API docs)
+- **Deployed application:** http://13.62.246.159:8501 (UI) and http://13.62.246/docs (API docs)
 - **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
 
 ## What the system does
