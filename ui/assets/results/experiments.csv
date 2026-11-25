@@ -1,4 +1,4 @@
-name,params,epochs_run,best_epoch,train_pr_auc,val_window_pr_auc,val_rec_roc_auc,val_rec_pr_auc,minutes
-A_base,23697,32,26,0.804,0.612,0.829,0.703,1.5
-B_wide,93473,32,26,0.843,0.643,0.843,0.717,2.6
-C_deep,98001,15,9,0.893,0.68,0.894,0.762,0.9
+experiment,parameters,epochs_run,kept_epoch,minutes,train_pr_auc,val_loss,val_accuracy,val_precision,val_recall,val_f1,val_roc_auc,val_pr_auc,val_rec_roc_auc,val_rec_pr_auc
+1_baseline,4833,15,15,0.7,0.684,0.412,0.85,0.759,0.136,0.231,0.695,0.421,0.723,0.528
+2_regularised,23697,32,26,1.4,0.803,0.4,0.826,0.48,0.557,0.516,0.795,0.611,0.828,0.702
+3_deep_l2_specaugment,98001,18,12,1.0,0.879,0.384,0.837,0.507,0.635,0.564,0.843,0.682,0.874,0.755

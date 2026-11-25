@@ -47,12 +47,12 @@ models/
   config.json, state.json         threshold and preprocessing settings; current model version
 api/main.py                       FastAPI service
 ui/                               Streamlit web interface (ui/assets holds figures and result tables)
-nginx/nginx.conf                  load balancer
+nginx.conf                        load balancer configuration
 locust/                           load test script and summary script
-scripts/                          scale.sh, run_load_tests.sh, reset_demo.sh, score_demo.py
+scripts/                          scale.sh, run_load_tests.sh, reset_demo.sh, score_demo.py, show_db.sh
 docker-compose.yml, Dockerfile.*  containers: api, gateway (nginx), ui, locust
-results/                          load test results
-tests/test_api.py                 end-to-end test of the API
+results/                          load test output (summary.md, chart and raw Locust files) once the tests have run
+tests/test_api.py                 automated end-to-end test of the API (predict, bad inputs, upload, retrain, promotion)
 ```
 
 ## Run it
@@ -101,8 +101,32 @@ model, samples, demo recordings and figures in the layout of this repository.
 ## Results
 
 ### Model (held-out test patients)
-TODO copy the table from the notebook (Section 8.5) or `ui/assets/results/test_metrics.csv`, with the experiment comparison from
-`ui/assets/results/experiments.csv`.
+Test set: 132 patients, 459 recordings (80 with a murmur). The model is the selected experiment 3 (deeper CNN with L2 and SpecAugment,
+98,001 parameters), with the decision threshold 0.38 chosen on validation recordings. Metrics are per recording, with 95% intervals from
+resampling patients.
+
+| Metric | Value | 95% interval |
+|---|---|---|
+| Accuracy | 0.948 | 0.920 to 0.972 |
+| Loss (log loss) | 0.156 | 0.112 to 0.211 |
+| Precision (murmur present) | 0.850 | 0.716 to 0.942 |
+| Recall (murmur present) | 0.850 | 0.736 to 0.952 |
+| F1 (murmur present) | 0.850 | 0.747 to 0.924 |
+| ROC-AUC | 0.960 | 0.918 to 0.992 |
+| PR-AUC | 0.923 | 0.842 to 0.976 |
+
+The model finds 68 of 80 murmur recordings and flags 12 of 379 absent recordings. Validation results are lower (recording-level
+ROC-AUC 0.871, PR-AUC 0.752), so the test figures are best read as an optimistic estimate.
+
+Experiments (validation set, recording level):
+
+| Experiment | Parameters | Validation ROC-AUC | Validation PR-AUC |
+|---|---|---|---|
+| 1 baseline CNN | 4,833 | 0.726 | 0.532 |
+| 2 regularised CNN (batch norm, dropout, class weights, early stopping) | 23,697 | 0.833 | 0.705 |
+| 3 deeper CNN with L2 and SpecAugment (selected) | 98,001 | 0.871 | 0.752 |
+
+Full tables, figures and interpretations are in the notebook (Sections 7 and 8).
 
 ### Load test (Locust)
 TODO paste `results/summary.md` and add `results/load_test_summary.png` after running `scripts/run_load_tests.sh`

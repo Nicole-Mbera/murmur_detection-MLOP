@@ -1,5 +1,8 @@
 metric,value,ci95_low,ci95_high
-ROC-AUC,0.969,0.934,0.995
-PR-AUC,0.934,0.858,0.983
-Recall (Present),0.825,0.704,0.932
-Precision (Present),0.957,0.889,1.0
+Accuracy,0.935,0.901,0.962
+Loss (log loss),0.216,0.18,0.257
+Precision (Present),0.784,0.644,0.892
+Recall (Present),0.862,0.753,0.957
+F1 (Present),0.821,0.71,0.897
+ROC-AUC,0.965,0.927,0.994
+PR-AUC,0.93,0.853,0.981

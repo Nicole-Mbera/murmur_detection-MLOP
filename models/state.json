@@ -1,6 +1,6 @@
 {
   "version": 1,
   "model_file": "murmur_cnn_v1.h5",
-  "threshold": 0.7,
+  "threshold": 0.48999999999999994,
   "history": []
 }

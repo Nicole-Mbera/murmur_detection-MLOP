@@ -1,5 +1,6 @@
 {
-  "threshold": 0.7,
+  "architecture": "3_deep_l2_specaugment",
+  "threshold": 0.48999999999999994,
   "sr": 4000,
   "win_sec": 5.0,
   "n_mels": 64,
@@ -8,6 +9,5 @@
     157,
     1
   ],
-  "architecture": "C_deep",
   "label_rule_restrict_to_murmur_locations": true
 }

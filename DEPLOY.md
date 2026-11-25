@@ -48,14 +48,20 @@ To see requests being spread across containers: `docker compose logs gateway | t
 
 ## 5. Load tests (Locust)
 ```bash
-USERS=30 DURATION=120s scripts/run_load_tests.sh
+scripts/run_load_tests.sh        # defaults: 100 users, 120 s per run
 ```
 This runs the same load against 1, 2 and 3 API containers and writes `results/summary.md`, `results/load_test_summary.png`
 and the raw Locust files. Copy them back to your computer with:
 ```bash
 scp -i your-key.pem -r ubuntu@<PUBLIC-IP>:~/<repo>/results ./results_from_aws
 ```
+Check the last column of `results/summary.md` ("Containers that answered"). It must equal the number of API containers in each row,
+otherwise the test did not measure what it says. (An earlier version of this script reset the API to one container before each
+test, which made every row a one-container result.)
+
 Notes for interpreting the results:
+- One API container handles roughly 30 requests per second (about 30 ms per request on one thread). The load must be high enough to
+  saturate it, so use 100 users or more; with too few users the extra containers show up as lower latency and not as higher throughput.
 - The machine has 2 vCPUs, and the Locust container runs on the same machine, so it competes with the API for CPU.
   Expect the gain from 1 to 2 containers to be larger than from 2 to 3. Say so in the README.
 - Do not retrain during a load test. Retraining uses the same CPUs.
