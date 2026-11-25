@@ -8,7 +8,7 @@ cloud deployment and load testing.
 The model is a screening aid, not a diagnostic tool. It extends my previous assignment (ECG arrhythmia classification) in
 the same cardiac screening theme, for settings where specialist cardiologists are scarce.
 
-- **Video demo:** TODO add the YouTube link
+- **Video demo:** https://youtu.be/3HfbucBVWFQ
 - **Deployed application:** TODO add the URL, for example `http://<public-ip>:8501` (UI) and `http://<public-ip>/docs` (API docs)
 - **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
 
