@@ -10,7 +10,7 @@ the same cardiac screening theme, for resource limited settings where specialist
 
 - **Video demo:** https://youtu.be/3HfbucBVWFQ
 - **Deployed application:** http://13.62.246.159:8501 (UI) and http://13.62.246.159/docs
-- **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
+- **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://www.kaggle.com/datasets/bjoernjostein/the-circor-digiscope-phonocardiogram-dataset-v2
 
 ## What the system does
 
