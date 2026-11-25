@@ -9,7 +9,7 @@ The model is a screening tool. It extends my previous assignment (ECG arrhythmia
 the same cardiac screening theme, for resource limited settings where specialist cardiologists are scarce.
 
 - **Video demo:** https://youtu.be/3HfbucBVWFQ
-- **Deployed application:** http://13.62.246.159:8501 (UI) and http://13.62.246/docs (API docs)
+- **Deployed application:** http://13.62.246.159:8501 (UI) and http://13.62.246.159/docs
 - **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
 
 ## What the system does
