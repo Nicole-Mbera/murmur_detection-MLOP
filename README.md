@@ -1,16 +1,16 @@
 # Heart murmur detection from heart sound recordings (CirCor DigiScope)
 
-An end-to-end machine learning pipeline for **non-tabular data (audio)**. A convolutional neural network classifies a
-heart sound recording as murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
+An end-to-end machine learning pipeline for audio processing and training a convolutional neural network classifier to detect whether a
+heart sound recording has features of murmur **present** or **absent**. The project covers data acquisition and preprocessing, model
 training and evaluation, a prediction API, a database for uploaded data, retraining, a web interface, Docker packaging,
 cloud deployment and load testing.
 
-The model is a screening aid, not a diagnostic tool. It extends my previous assignment (ECG arrhythmia classification) in
-the same cardiac screening theme, for settings where specialist cardiologists are scarce.
+The model is a screening tool. It extends my previous assignment (ECG arrhythmia classification) in
+the same cardiac screening theme, for resource limited settings where specialist cardiologists are scarce.
 
-- **Video demo:** TODO add the YouTube link
-- **Deployed application:** TODO add the URL, for example `http://<public-ip>:8501` (UI) and `http://<public-ip>/docs` (API docs)
-- **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://physionet.org/content/circor-heart-sound/
+- **Video demo:** https://youtu.be/3HfbucBVWFQ
+- **Deployed application:** http://13.62.246.159:8501 (UI) and http://13.62.246.159/docs
+- **Dataset:** CirCor DigiScope Phonocardiogram Dataset (PhysioNet): https://www.kaggle.com/datasets/bjoernjostein/the-circor-digiscope-phonocardiogram-dataset-v2
 
 ## What the system does
 
@@ -29,7 +29,6 @@ the same cardiac screening theme, for settings where specialist cardiologists ar
 ```
 README.md
 DEPLOY.md                         AWS deployment and load test instructions
-WALKTHROUGH.md                    plain-language explanation of the project and the demo plan
 notebook/heart_murmur.ipynb       EDA, preprocessing, three experiments, evaluation, saving, demos
 src/
   preprocessing.py                audio -> log-mel spectrogram windows (shared by notebook, API, retraining)
@@ -100,7 +99,7 @@ model, samples, demo recordings and figures in the layout of this repository.
 
 ## Results
 
-### Model (held-out test patients)
+### Model Evaluation (held-out test patients)
 Test set: 132 patients, 459 recordings (80 with a murmur). The model is the selected experiment 3 (deeper CNN with L2 and SpecAugment,
 98,001 parameters), with the decision threshold 0.38 chosen on validation recordings. Metrics are per recording, with 95% intervals from
 resampling patients.
@@ -129,12 +128,19 @@ Experiments (validation set, recording level):
 Full tables, figures and interpretations are in the notebook (Sections 7 and 8).
 
 ### Load test (Locust)
-TODO paste `results/summary.md` and add `results/load_test_summary.png` after running `scripts/run_load_tests.sh`
-(conditions: instance type, number of users, duration).
+<img width="1487" height="566" alt="image" src="https://github.com/user-attachments/assets/5c3c6b51-2db8-4187-be0b-1ccc42aeafd9" />
+
+
+| API containers | Requests | Failures | Median (ms) | Mean (ms) | p95 (ms) | p99 (ms) | Requests/s | Containers that answered |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 3525 | 0 | 2700 | 2635 | 3100 | 3300 | 29.4 | 1 |
+| 2 | 4822 | 1 | 1600 | 1769 | 3800 | 4500 | 40.2 | 2 |
+| 3 | 4734 | 3 | 1100 | 1810 | 5100 | 6100 | 39.5 | 3 |
+
 
 ## Limitations
 - The label rule keeps a recording from a murmur patient only where a murmur was annotated at that site, so performance is measured on those
   recordings and not on every recording from a murmur patient.
 - Results come from one data split and one training run per experiment.
-- The demo recordings come from test patients, so after the retraining demo the test set is no longer untouched for the retrained model.
 - The API has no authentication, and the model has been validated on one pediatric dataset only.
+- AWS free credits are limited to 120/per month, hopefully the instance will be still running by the time they grade, and they won't run out.
