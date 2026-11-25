@@ -29,7 +29,6 @@ the same cardiac screening theme, for resource limited settings where specialist
 ```
 README.md
 DEPLOY.md                         AWS deployment and load test instructions
-WALKTHROUGH.md                    plain-language explanation of the project and the demo plan
 notebook/heart_murmur.ipynb       EDA, preprocessing, three experiments, evaluation, saving, demos
 src/
   preprocessing.py                audio -> log-mel spectrogram windows (shared by notebook, API, retraining)
@@ -100,7 +99,7 @@ model, samples, demo recordings and figures in the layout of this repository.
 
 ## Results
 
-### Model (held-out test patients)
+### Model Evaluation (held-out test patients)
 Test set: 132 patients, 459 recordings (80 with a murmur). The model is the selected experiment 3 (deeper CNN with L2 and SpecAugment,
 98,001 parameters), with the decision threshold 0.38 chosen on validation recordings. Metrics are per recording, with 95% intervals from
 resampling patients.
@@ -143,5 +142,5 @@ Full tables, figures and interpretations are in the notebook (Sections 7 and 8).
 - The label rule keeps a recording from a murmur patient only where a murmur was annotated at that site, so performance is measured on those
   recordings and not on every recording from a murmur patient.
 - Results come from one data split and one training run per experiment.
-- The demo recordings come from test patients, so after the retraining demo the test set is no longer untouched for the retrained model.
 - The API has no authentication, and the model has been validated on one pediatric dataset only.
+- AWS free credits are limited to 120/per month, hopefully the instance will be still running by the time they grade, and they won't run out.
