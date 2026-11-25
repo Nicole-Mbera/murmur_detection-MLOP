@@ -16,7 +16,6 @@ the Streamlit UI (`ui`) on port 8501, and an optional Locust container (`locust`
    - HTTP (80): anywhere
    - Custom TCP 8501: anywhere
 6. Storage: 30 GiB gp3. Launch.
-7. In Billing, confirm the budget alert you created is active.
 
 ## 2. Install Docker on the machine
 ```bash
@@ -56,16 +55,8 @@ and the raw Locust files. Copy them back to your computer with:
 scp -i your-key.pem -r ubuntu@<PUBLIC-IP>:~/<repo>/results ./results_from_aws
 ```
 Check the last column of `results/summary.md` ("Containers that answered"). It must equal the number of API containers in each row,
-otherwise the test did not measure what it says. (An earlier version of this script reset the API to one container before each
-test, which made every row a one-container result.)
+otherwise the test did not measure what it says.
 
-Notes for interpreting the results:
-- One API container handles roughly 30 requests per second (about 30 ms per request on one thread). The load must be high enough to
-  saturate it, so use 100 users or more; with too few users the extra containers show up as lower latency and not as higher throughput.
-- The machine has 2 vCPUs, and the Locust container runs on the same machine, so it competes with the API for CPU.
-  Expect the gain from 1 to 2 containers to be larger than from 2 to 3. Say so in the README.
-- Do not retrain during a load test. Retraining uses the same CPUs.
-- Run `scripts/reset_demo.sh` and `docker compose restart api` before a test if you retrained earlier, so the model is v1.
 
 ## 6. After changing the code or the model
 ```bash
@@ -87,7 +78,6 @@ scripts/reset_demo.sh               # back to model v1, no uploaded data
 ## 8. Cost and security
 - First run `docker compose down`, then stop the instance (EC2 > Instance state > Stop) when you are not using it. Stopping pauses
   compute charges; the disk is still billed. The public IP changes after a stop and start, so update the URL in the README.
-- Check the Billing dashboard every day or two.
 - The API has no login. Anyone who knows the address can upload data and trigger retraining. Keep the security group tight
   (or stop the instance) outside your demo and the grading period.
 - If memory runs out (`docker stats`, `docker compose logs api`), use 2 API containers.
